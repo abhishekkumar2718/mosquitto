@@ -14,6 +14,9 @@ class RngProducer(mqtt.Client):
         self._status_topic = f'status/{self._pid}'
         self._reading_topic = f'random_numbers/{self._pid}'
 
+        # Set Last Will And Testament Message
+        self.will_set(self._status_topic, 'offline', qos=1, retain=True)
+
     def on_connect(self, mqttc, userdata, flags, rc):
         print(f'Connected with result code: {rc}')
 
@@ -34,13 +37,13 @@ class RngProducer(mqtt.Client):
             print(f'[{self._pid}]: {reading}')
 
             # It's okay if a few readings get dropped
-            self.publish(self._reading_topic, payload=reading, qos=0)
+            self.publish(self._reading_topic, payload=reading, qos=0, retain=True)
 
             time.sleep(5)
 
     def set_status(self, status):
         # Use QoS 1 to make sure the message reaches the broker
-        self.publish(self._status_topic, payload=status, qos=1)
+        self.publish(self._status_topic, payload=status, qos=1, retain=True)
 
         print(f'[{self._pid}]: {status}')
 

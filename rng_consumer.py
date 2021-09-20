@@ -15,8 +15,9 @@ class RngConsumer(mqtt.Client):
     def on_connect(self, mqttc, userdata, flags, rc):
         print(f'Connected with result code: {rc}')
 
+        # TODO: Why does client id not work with subclass of mqtt.Client?
         if rc == 0:
-            print(mqttc.client_id)
+            print(mqttc._client_id)
 
     def on_message(self, mqttc, userdata, message):
         if message.topic == '$SYS/broker/clients/connected':
@@ -31,7 +32,7 @@ class RngConsumer(mqtt.Client):
 
     def handle_status_message(self, message):
         pid = message.topic[7:]
-        status = str(message.payload)
+        status = message.payload.decode('utf-8')
 
         if status == 'online':
             self._online_producers.add(pid)
