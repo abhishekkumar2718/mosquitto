@@ -21,25 +21,31 @@ class RngProducer(mqtt.Client):
         self.set_status('online')
 
     def blocking_read(self):
-        """To simulate an IoT sensor, sleep for five seconds and "read" a random number."""
-        time.sleep(5)
-
-        return random.random(0, 50)
+        """To simulate an IoT sensor, "read" a random number."""
+        return round(random.uniform(0, 50), 3)
 
     def run(self):
         while True:
             reading = self.blocking_read()
 
+            print(f'[{self._pid}]: {reading}')
+
             # It's okay if a few readings get dropped
             self.publish(self._reading_topic, payload=reading, qos=0)
+
+            time.sleep(5)
 
     def set_status(self, status):
         # Use QoS 1 to make sure the message reaches the broker
         self.publish(self._status_topic, payload=status, qos=1)
 
+        print(f'[{self._pid}]: {status}')
+
 
 if __name__ == "__main__":
-    producer = RngProducer()
+    producer = RngProducer(os.getpid())
+
+    producer.username_pw_set('rng_producer', 'rng_producer')
 
     try:
         # Connect to MQTT broker

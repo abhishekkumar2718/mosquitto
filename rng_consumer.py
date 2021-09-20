@@ -1,6 +1,6 @@
 import paho.mqtt.client as mqtt
 
-class RngConsumer(mqtt.client):
+class RngConsumer(mqtt.Client):
     def __init__(self):
         super().__init__()
 
@@ -23,11 +23,12 @@ class RngConsumer(mqtt.client):
 
     def handle_status_message(self, message):
         pid = message.topic[7:]
+        status = str(message.payload)
 
-        if message.payload == 'online':
+        if status == 'online':
             self._online_producers.add(pid)
         else:
-            self._online_producers.remove(pid)
+            self._online_producers.discard(pid)
 
         print(f'Online producers: {self._online_producers}')
 
@@ -48,6 +49,8 @@ class RngConsumer(mqtt.client):
 if __name__ == "__main__":
     consumer = RngConsumer()
 
+    consumer.username_pw_set('rng_consumer', 'rng_consumer')
+
     try:
         consumer.connect("localhost")
 
@@ -64,5 +67,5 @@ if __name__ == "__main__":
 
         consumer.loop_forever()
     finally:
-        producer.disconnect()
-        producer.loop_stop()
+        consumer.disconnect()
+        consumer.loop_stop()
