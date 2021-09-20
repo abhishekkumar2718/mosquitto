@@ -7,7 +7,7 @@ import paho.mqtt.client as mqtt
 class RngProducer(mqtt.Client):
     def __init__(self, pid):
         # Initialize the base class first
-        super().__init__()
+        super().__init__(clean_session=True)
 
         self._pid = pid
 
@@ -17,8 +17,11 @@ class RngProducer(mqtt.Client):
     def on_connect(self, mqttc, userdata, flags, rc):
         print(f'Connected with result code: {rc}')
 
-        # Once connected, update the status.
-        self.set_status('online')
+        if rc == 0:
+            # Once connected, update the status.
+            self.set_status('online')
+
+            print(mqttc.client_id)
 
     def blocking_read(self):
         """To simulate an IoT sensor, "read" a random number."""

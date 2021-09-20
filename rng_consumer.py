@@ -1,14 +1,22 @@
+import sys
+
 import paho.mqtt.client as mqtt
 
 class RngConsumer(mqtt.Client):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, client_id=None):
+        if client_id:
+            super().__init__(client_id=client_id, clean_session=False)
+        else:
+            super().__init__()
 
         self._readings = {}
         self._online_producers = set()
 
     def on_connect(self, mqttc, userdata, flags, rc):
         print(f'Connected with result code: {rc}')
+
+        if rc == 0:
+            print(mqttc.client_id)
 
     def on_message(self, mqttc, userdata, message):
         if message.topic == '$SYS/broker/clients/connected':
@@ -47,7 +55,11 @@ class RngConsumer(mqtt.Client):
 
 
 if __name__ == "__main__":
-    consumer = RngConsumer()
+    client_id = None
+    if len(sys.argv) > 1:
+        client_id = sys.argv[1]
+
+    consumer = RngConsumer(client_id)
 
     consumer.username_pw_set('rng_consumer', 'rng_consumer')
 
