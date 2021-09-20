@@ -24,7 +24,7 @@ class RngProducer(mqtt.Client):
             # Once connected, update the status.
             self.set_status('online')
 
-            print(mqttc.client_id)
+            print(mqttc._client_id)
 
     def blocking_read(self):
         """To simulate an IoT sensor, "read" a random number."""
